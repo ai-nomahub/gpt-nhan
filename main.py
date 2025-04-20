@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-import openai
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # Load biến môi trường từ file .env
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Khởi tạo ứng dụng FastAPI
 app = FastAPI()
@@ -125,7 +125,7 @@ async def relay_gpt_nhan(data: PromptInput, authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             temperature=0.7,
             messages=[
@@ -133,7 +133,7 @@ async def relay_gpt_nhan(data: PromptInput, authorization: str = Header(None)):
                 {"role": "user", "content": data.prompt.strip()}
             ]
         )
-        reply = response['choices'][0]['message']['content'].strip()
+        reply = response.choices[0].message.content.strip()
         return {"reply": reply}
 
     except Exception as e:
