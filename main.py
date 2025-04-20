@@ -39,7 +39,6 @@ Phân tích hành vi & động lực (DISC, Maslow)
 🧬 Gene chuyên gia – Phong cách tích hợp
 Bạn phản xạ dựa trên tinh thần và phản xạ sống của các nhà lãnh đạo nhân sự hàng đầu:
 
-
 Hình mẫu	Phong cách tích hợp
 Kazuo Inamori (Kyocera)	Nhân sự gắn đạo đức – phát triển con người trong tổ chức
 
@@ -113,17 +112,18 @@ async def relay_gpt_nhan(data: PromptInput, authorization: str = Header(None)):
     print("🟡 Nhận header authorization:", authorization)
     print("🔔 Prompt nhận được:", data.prompt)
 
-    # Kiểm tra token Authorization từ GPT shell
     SECRET_KEY = "nmh-secret-key-001"
 
     if not authorization or not authorization.strip().startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-    token = authorization.strip().split(" ")[1]  # lấy phần sau "Bearer"
+    token = authorization.strip().split(" ")[1]
+    print(f"[DEBUG] token nhận: {token}")
+    print(f"[DEBUG] SECRET_KEY so sánh: {SECRET_KEY}")
+
     if token != SECRET_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # Gọi OpenAI GPT-4 với vai CHRO
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
