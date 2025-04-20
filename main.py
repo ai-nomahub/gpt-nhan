@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from fastapi.openapi.utils import get_openapi
 
 # Load biến môi trường từ file .env
 load_dotenv()
@@ -138,3 +139,28 @@ async def relay_gpt_nhan(data: PromptInput, authorization: str = Header(None)):
 
     except Exception as e:
         return {"error": str(e)}
+
+# Swagger UI: bật xác thực Bearer token trong docs
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="GPT Nhân",
+        version="1.0.0",
+        description="API relay GPT Nhân – CHRO Assistant",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer"
+        }
+    }
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"bearerAuth": []}]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
